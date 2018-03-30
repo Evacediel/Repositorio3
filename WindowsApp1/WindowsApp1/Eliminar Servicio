@@ -1,0 +1,89 @@
+Imports System.Data.SqlClient
+Imports System.Data
+Public Class Eliminar_Servicio
+    Dim conec As New conexionbd
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles btnregresar.Click
+        Form1.Show()
+        Me.Hide()
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
+
+        Try
+            conec.conectarbase()
+
+            Dim cmd As New SqlCommand("SELECT * FROM Datos_Servicio", conec.conectarbase())
+            cmd.ExecuteNonQuery()
+            Dim dt As New DataTable
+            Dim da As New SqlDataAdapter(cmd)
+            da.Fill(dt)
+
+            Me.txtcodigo.Text = Me.ComboBox1.DataSource.rows(Me.ComboBox1.SelectedIndex)("codigo")
+            Me.txtvalor.Text = Me.ComboBox1.DataSource.rows(Me.ComboBox1.SelectedIndex)("valor")
+            cmd.ExecuteNonQuery()
+
+        Catch ex As Exception
+
+        End Try
+
+    End Sub
+
+    Private Sub btneliminar_Click(sender As Object, e As EventArgs) Handles btneliminar.Click
+
+        If ComboBox1.Text = "" Then
+            MessageBox.Show("No se ha elegido servicio")
+        Else
+            Try
+                conec.conectarbase()
+                Dim cmd As New SqlCommand("eliminarservicio", conec.conectarbase())
+                cmd.CommandType = CommandType.StoredProcedure
+                cmd.Parameters.Add("@codigo", SqlDbType.VarChar).Value = txtcodigo.Text
+                cmd.ExecuteNonQuery()
+            Catch ex As Exception
+                MessageBox.Show(ex.Message)
+
+            End Try
+            conec.conectarbase()
+
+            Dim cmd1 As New SqlCommand("SELECT * FROM Datos_Servicio ", conec.conectarbase())
+
+            Dim da1 As New SqlDataAdapter(cmd1)
+
+            Dim ds1 As New DataSet
+            da1.Fill(ds1)
+            With Me.ComboBox1
+                Me.ComboBox1.DataSource = ds1.Tables(0)
+                Me.ComboBox1.DisplayMember = "nombre"
+            End With
+        End If
+        ComboBox1.ResetText()
+        ComboBox1.Update()
+        txtvalor.Text = ""
+        txtcodigo.Text = ""
+    End Sub
+
+    Private Sub Eliminar_Servicio_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        conec.conectarbase()
+
+        Dim cmd As New SqlCommand("SELECT * FROM Datos_Servicio ", conec.conectarbase())
+
+        Dim da As New SqlDataAdapter(cmd)
+
+        Dim ds As New DataSet
+        da.Fill(ds)
+        With Me.ComboBox1
+            Me.ComboBox1.DataSource = ds.Tables(0)
+            Me.ComboBox1.DisplayMember = "nombre"
+        End With
+        ComboBox1.ResetText()
+        ComboBox1.Update()
+        txtvalor.Text = ""
+        txtcodigo.Text = ""
+    End Sub
+
+End Class
